@@ -50,7 +50,7 @@ export default function InvoicePage() {
           </div>
         </div>
         {!invoice.paid && (
-          <WalletConnector invoice={invoice} onPaymentSuccess={handlePaymentSuccess} />
+          <WalletConnector />
         )}
       </div>
     </div>
