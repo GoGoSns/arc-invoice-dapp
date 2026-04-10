@@ -1,8 +1,7 @@
-'use client'
-
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import WalletButton from '../components/WalletButton'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -23,12 +22,7 @@ export default function RootLayout({
           <h1 className="text-3xl font-bold bg-gradient-to-r from-purple to-blue bg-clip-text text-transparent">
             ArcPay
           </h1>
-          <button
-            onClick={() => (window as any).ethereum?.request({method: 'eth_requestAccounts'})}
-            className="px-4 py-2 bg-gradient-to-r from-purple to-blue text-white rounded-lg hover:opacity-90 transition-opacity"
-          >
-            Connect Wallet
-          </button>
+          <WalletButton />
         </header>
         {children}
       </body>
