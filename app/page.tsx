@@ -20,7 +20,18 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-white">Create Invoice</h1>
+        <div className="mb-6">
+          <button
+            onClick={() => {
+              if (typeof window !== 'undefined' && (window as any).ethereum) {
+                (window as any).ethereum.request({ method: 'eth_requestAccounts' })
+              }
+            }}
+            className="w-full py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg hover:opacity-90 transition-opacity font-semibold mb-4"
+          >
+            Connect Wallet
+          </button>
+        </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-white mb-2">Recipient Address</label>
