@@ -61,6 +61,8 @@ export default function InvoicePage() {
     console.log('Button clicked: Connect Wallet')
     connectWallet()
   }
+
+  const connectWallet = async () => {
     console.log('connectWallet: Function called')
     
     if (typeof (window as any).ethereum !== 'undefined') {
