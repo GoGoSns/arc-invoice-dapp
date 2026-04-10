@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import WalletButton from '../components/WalletButton'
+import WalletButton from '@/components/WalletButton'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <header className="flex justify-between items-center p-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple to-blue bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-500 to-blue-500 bg-clip-text text-transparent">
             ArcPay
           </h1>
           <WalletButton />
