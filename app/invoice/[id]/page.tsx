@@ -18,33 +18,66 @@ export default function InvoicePage() {
   const connectAndPay = async () => {
     const eth = (window as any).ethereum
     if (!eth) { alert('MetaMask yükleyin!'); return }
-    const accounts = await eth.request({ method: 'eth_requestAccounts' })
-    setAccount(accounts[0])
-    setPaying(true)
+
     try {
-      await eth.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x4CE052' }],
-      })
+      // Cüzdan bağla
+      const accounts = await eth.request({ method: 'eth_requestAccounts' })
+      setAccount(accounts[0])
+
+      // Arc Testnet'e geç (Chain ID: 5042002 = 0x4CE052)
+      try {
+        await eth.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x4CE052' }],
+        })
+      } catch (switchError: any) {
+        // Ağ yoksa ekle
+        if (switchError.code === 4902) {
+          await eth.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x4CE052',
+              chainName: 'Arc Testnet',
+              nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+              rpcUrls: ['https://rpc.testnet.arc.io'],
+              blockExplorerUrls: ['https://testnet.arcscan.app'],
+            }],
+          })
+        } else {
+          throw switchError
+        }
+      }
+
+      setPaying(true)
+
+      // USDC transfer (Arc Testnet USDC contract adresini buraya yaz)
+      const USDC_CONTRACT = '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238' // Arc testnet USDC adresini güncelle!
       const amount = BigInt(Math.floor(invoice.amount * 1e6))
-      const data = '0xa9059cbb' +
+      const transferData = '0xa9059cbb' +
         invoice.recipient.slice(2).padStart(64, '0') +
         amount.toString(16).padStart(64, '0')
+
       const tx = await eth.request({
         method: 'eth_sendTransaction',
-        params: [{ from: accounts[0], to: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', data }],
+        params: [{ from: accounts[0], to: USDC_CONTRACT, data: transferData }],
       })
+
       const updated = { ...invoice, paid: true, txHash: tx }
       localStorage.setItem(`invoice_${id}`, JSON.stringify(updated))
       setInvoice(updated)
-      alert('Ödeme başarılı!')
+      alert('Ödeme başarılı! 🎉')
     } catch (e: any) {
-      alert('Hata: ' + e.message)
+      alert('Hata: ' + (e.message || 'Bilinmeyen hata'))
     }
+
     setPaying(false)
   }
 
-  if (!invoice) return <div className="min-h-screen flex items-center justify-center"><div className="text-white">Loading...</div></div>
+  if (!invoice) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-white">Loading...</div>
+    </div>
+  )
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
@@ -57,8 +90,11 @@ export default function InvoicePage() {
           <div><strong>Recipient:</strong> {invoice.recipient}</div>
           <div><strong>Status:</strong> {invoice.paid ? '✅ Paid' : '⏳ Unpaid'}</div>
           {invoice.txHash && (
-            <div><strong>Transaction:</strong>{' '}
-              <a href={`https://testnet.arcscan.app/tx/${invoice.txHash}`} target="_blank" rel="noopener noreferrer" className="text-blue-300 underline">Explorer'da Gör</a>
+            <div>
+              <strong>Transaction:</strong>{' '}
+              <a href={`https://testnet.arcscan.app/tx/${invoice.txHash}`} target="_blank" rel="noopener noreferrer" className="text-blue-300 underline">
+                Explorer da Gör
+              </a>
             </div>
           )}
         </div>
@@ -70,7 +106,7 @@ export default function InvoicePage() {
         )}
         {invoice.paid && (
           <div className="mt-6 p-4 bg-green-500/20 border border-green-500/30 rounded-lg">
-            <p className="text-green-400 text-center">✅ Bu fatura ödendi</p>
+            <p className="text-green-400 text-center">Bu fatura odendi</p>
           </div>
         )}
       </div>
