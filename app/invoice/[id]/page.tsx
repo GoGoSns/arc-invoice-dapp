@@ -11,8 +11,16 @@ export default function InvoicePage() {
   const [paying, setPaying] = useState(false)
 
   useEffect(() => {
-    const data = localStorage.getItem(`invoice_${id}`)
-    if (data) setInvoice(JSON.parse(data))
+    const params2 = new URLSearchParams(window.location.search)
+    const data = params2.get('data')
+    if (data) {
+      const parsed = JSON.parse(atob(data))
+      setInvoice(parsed)
+      localStorage.setItem(`invoice_${id}`, JSON.stringify(parsed))
+    } else {
+      const stored = localStorage.getItem(`invoice_${id}`)
+      if (stored) setInvoice(JSON.parse(stored))
+    }
   }, [id])
 
   const connectAndPay = async () => {
@@ -22,10 +30,11 @@ export default function InvoicePage() {
       const accounts = await eth.request({ method: 'eth_requestAccounts' })
       setAccount(accounts[0])
       setPaying(true)
-      const USDC_CONTRACT = '0x3600000000000000000000000000000000000000'
-      const amount = BigInt(Math.floor(invoice.amount * 1e6))
-      const transferData = '0xa9059cbb' + invoice.recipient.slice(2).padStart(64, '0') + amount.toString(16).padStart(64, '0')
-      const tx = await eth.request({ method: 'eth_sendTransaction', params: [{ from: accounts[0], to: USDC_CONTRACT, data: transferData }] })
+      const amount = BigInt(Math.floor(invoice.amount * 1e18))
+      const tx = await eth.request({
+        method: 'eth_sendTransaction',
+        params: [{ from: accounts[0], to: invoice.recipient, value: '0x' + amount.toString(16) }]
+      })
       const updated = { ...invoice, paid: true, txHash: tx }
       localStorage.setItem(`invoice_${id}`, JSON.stringify(updated))
       setInvoice(updated)
