@@ -21,14 +21,6 @@ export default function InvoicePage() {
     try {
       const accounts = await eth.request({ method: 'eth_requestAccounts' })
       setAccount(accounts[0])
-      try {
-        await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE052' }] })
-      } catch (switchError: any) {
-        if (switchError.code === 4902 || switchError.code === -32603) {
-          await eth.request({ method: 'wallet_addEthereumChain', params: [{ chainId: '0x4CE052', chainName: 'Arc Testnet', nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 }, rpcUrls: ['https://5042002.rpc.thirdweb.com'], blockExplorerUrls: ['https://testnet.arcscan.app'] }] })
-          await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE052' }] })
-        } else { throw switchError }
-      }
       setPaying(true)
       const USDC_CONTRACT = '0x3600000000000000000000000000000000000000'
       const amount = BigInt(Math.floor(invoice.amount * 1e6))
