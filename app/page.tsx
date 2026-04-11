@@ -9,7 +9,6 @@ export default function Home() {
   const [recipient, setRecipient] = useState('')
   const [invoiceLink, setInvoiceLink] = useState('')
   const [account, setAccount] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     const eth = (window as any).ethereum
@@ -30,44 +29,16 @@ export default function Home() {
     setAccount(accounts[0])
   }
 
-  const switchToArc = async (eth: any) => {
-    try {
-      await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE052' }] })
-    } catch (switchError: any) {
-      if (switchError.code === 4902 || switchError.code === -32603) {
-        await eth.request({
-          method: 'wallet_addEthereumChain', params: [{
-            chainId: '0x4CE052',
-            chainName: 'Arc Testnet',
-            nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
-            rpcUrls: ['https://rpc.testnet.arc.network'],
-            blockExplorerUrls: ['https://testnet.arcscan.app'],
-          }]
-        })
-      } else {
-        throw switchError
-      }
-    }
-  }
-
-  const createInvoice = async () => {
+  const createInvoice = () => {
     if (!amount || !description || !dueDate || !recipient) {
       alert('Tum alanlari doldurun!')
       return
     }
-    setIsLoading(true)
-    const eth = (window as any).ethereum
-    try {
-      await switchToArc(eth)
-      const id = crypto.randomUUID()
-      const invoice = { id, amount: parseFloat(amount), description, dueDate, recipient, paid: false, txHash: null }
-      localStorage.setItem(`invoice_${id}`, JSON.stringify(invoice))
-      setInvoiceLink(`${window.location.origin}/invoice/${id}`)
-      setAmount(''); setDescription(''); setDueDate(''); setRecipient('')
-    } catch (error: any) {
-      alert('Hata: ' + (error.message || 'Bilinmeyen hata'))
-    }
-    setIsLoading(false)
+    const id = crypto.randomUUID()
+    const invoice = { id, amount: parseFloat(amount), description, dueDate, recipient, paid: false, txHash: null }
+    localStorage.setItem(`invoice_${id}`, JSON.stringify(invoice))
+    setInvoiceLink(`${window.location.origin}/invoice/${id}`)
+    setAmount(''); setDescription(''); setDueDate(''); setRecipient('')
   }
 
   if (!account) {
@@ -108,8 +79,8 @@ export default function Home() {
             <label className="block text-white mb-2">Son Tarih</label>
             <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className="w-full p-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
           </div>
-          <button onClick={createInvoice} disabled={isLoading} className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-bold hover:opacity-90 disabled:opacity-50">
-            {isLoading ? 'Olusturuluyor...' : 'Fatura Olustur'}
+          <button onClick={createInvoice} className="w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-bold hover:opacity-90">
+            Fatura Olustur
           </button>
         </div>
         {invoiceLink && (
