@@ -30,6 +30,26 @@ export default function Home() {
     setAccount(accounts[0])
   }
 
+  const switchToArc = async (eth: any) => {
+    try {
+      await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE052' }] })
+    } catch (switchError: any) {
+      if (switchError.code === 4902 || switchError.code === -32603) {
+        await eth.request({
+          method: 'wallet_addEthereumChain', params: [{
+            chainId: '0x4CE052',
+            chainName: 'Arc Testnet',
+            nativeCurrency: { name: 'USDC', symbol: 'USDC', decimals: 18 },
+            rpcUrls: ['https://rpc.testnet.arc.network'],
+            blockExplorerUrls: ['https://testnet.arcscan.app'],
+          }]
+        })
+      } else {
+        throw switchError
+      }
+    }
+  }
+
   const createInvoice = async () => {
     if (!amount || !description || !dueDate || !recipient) {
       alert('Tum alanlari doldurun!')
@@ -38,7 +58,7 @@ export default function Home() {
     setIsLoading(true)
     const eth = (window as any).ethereum
     try {
-      await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x4CE052' }] })
+      await switchToArc(eth)
       const id = crypto.randomUUID()
       const invoice = { id, amount: parseFloat(amount), description, dueDate, recipient, paid: false, txHash: null }
       localStorage.setItem(`invoice_${id}`, JSON.stringify(invoice))
