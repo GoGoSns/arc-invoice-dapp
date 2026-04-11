@@ -65,7 +65,7 @@ export default function InvoicePage() {
         {!invoice.paid && (
           <button onClick={connectAndPay} disabled={paying}
             className="mt-6 w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg font-bold hover:opacity-90 disabled:opacity-50">
-            {paying ? 'İşleniyor...' : account ? `${invoice.amount} USDC Öde` : 'Bağlan ve Öde'}
+            {paying ? "İşleniyor..." : account ? `${invoice.amount} USDC Öde` : "Bağlan ve Öde"}
           </button>
         )}
         {invoice.paid && (
